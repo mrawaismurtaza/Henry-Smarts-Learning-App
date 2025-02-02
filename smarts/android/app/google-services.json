@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "986463954633",
+    "project_id": "smarts-54b47",
+    "storage_bucket": "smarts-54b47.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:986463954633:android:32304513ec161143ee4f18",
+        "android_client_info": {
+          "package_name": "com.example.smarts"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDL8fVLqHgKB2kpdooJDJ7Ij03VL023OaI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
