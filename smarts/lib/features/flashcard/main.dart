@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,9 +19,8 @@ class _FlashCardState extends State<FlashCard> {
   List<Map<String, dynamic>> _questions = [];
   bool _isLoading = true;
   Map<String, Color> _answerColors = {};
-  
-  // Variables to store previous performance data
-  double _previousPerformance = 0; 
+
+  double _previousPerformance = 0;
   int _previousAttempts = 0;
 
   @override
@@ -30,10 +31,10 @@ class _FlashCardState extends State<FlashCard> {
 
   Future<void> _loadQuestions() async {
     try {
-      // Fetch previous performance from Firestore
       User? user = _firebaseService.getCurrentUser();
       if (user != null) {
-        DocumentReference performanceRef = FirebaseFirestore.instance.collection('flashcard').doc(user.uid);
+        DocumentReference performanceRef =
+            FirebaseFirestore.instance.collection('flashcard_performance').doc(user.uid);
         DocumentSnapshot docSnapshot = await performanceRef.get();
 
         if (docSnapshot.exists) {
@@ -46,7 +47,6 @@ class _FlashCardState extends State<FlashCard> {
         }
       }
 
-      // Load flashcards
       var querySnapshot = await FirebaseFirestore.instance.collection('flashcards').get();
       setState(() {
         _questions = querySnapshot.docs.map((doc) {
@@ -92,13 +92,12 @@ class _FlashCardState extends State<FlashCard> {
     if (user != null) {
       try {
         double currentPercentage = (_score / _questions.length) * 100;
-
-        // Combine previous and current performance (using average here)
-        double updatedPercentage = ((_previousPerformance * _previousAttempts) + currentPercentage) /
-            (_previousAttempts + 1);
+        double updatedPercentage =
+            ((_previousPerformance * _previousAttempts) + currentPercentage) / (_previousAttempts + 1);
         int updatedAttempts = _previousAttempts + 1;
 
-        DocumentReference performanceRef = FirebaseFirestore.instance.collection('flashcard').doc(user.uid);
+        DocumentReference performanceRef =
+            FirebaseFirestore.instance.collection('flashcard_performance').doc(user.uid);
         DocumentSnapshot docSnapshot = await performanceRef.get();
 
         if (docSnapshot.exists) {
@@ -125,7 +124,8 @@ class _FlashCardState extends State<FlashCard> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("Quiz Finished"),
-          content: Text("Your score is $_score out of ${_questions.length}\nYour percentage is ${percentage.toStringAsFixed(2)}%"),
+          content: Text(
+              "Your score is $_score out of ${_questions.length}\nYour percentage is ${percentage.toStringAsFixed(2)}%"),
           actions: [
             TextButton(
               onPressed: () {
@@ -157,85 +157,99 @@ class _FlashCardState extends State<FlashCard> {
     }
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/images/02.png"),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              height: 400,
-              width: MediaQuery.of(context).size.width * 0.9,
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _questions[_currentQuestionIndex]['question'],
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 20),
-                  ..._questions[_currentQuestionIndex]['options'].map((option) {
-                    return Container(
-                      margin: EdgeInsets.symmetric(vertical: 5),
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => _answerQuestion(option),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _answerColors[option] ?? Colors.blue,
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: Text(option, style: TextStyle(fontSize: 16)),
-                      ),
-                    );
-                  }).toList(),
-                ],
+      body: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/02.png"),
+                fit: BoxFit.cover,
               ),
             ),
-            SizedBox(height: 30),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.9,
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.amber,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  height: 400,
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Progress", style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text("${_currentQuestionIndex + 1}/${_questions.length} Cards Complete"),
+                      Text(
+                        _questions[_currentQuestionIndex]['question'],
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 20),
+                      ..._questions[_currentQuestionIndex]['options'].map((option) {
+                        return Container(
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () => _answerQuestion(option),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _answerColors[option] ?? Colors.blue,
+                              padding: EdgeInsets.symmetric(vertical: 15),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: Text(option, style: TextStyle(fontSize: 16)),
+                          ),
+                        );
+                      }).toList(),
                     ],
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                    decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(10)),
-                    child: Text(
-                      "${((_score / _questions.length) * 100).toStringAsFixed(0)}%", 
-                      style: TextStyle(color: Colors.white),
-                    ),
+                ),
+                SizedBox(height: 30),
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.amber,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                ],
-              ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Progress", style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text("${_currentQuestionIndex + 1}/${_questions.length} Cards Complete"),
+                        ],
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                        decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(10)),
+                        child: Text(
+                          "${((_score / _questions.length) * 100).toStringAsFixed(0)}%",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Positioned(
+            top: 40,
+            left: 10,
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: const Color.fromARGB(255, 85, 84, 170), size: 30),
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/');
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

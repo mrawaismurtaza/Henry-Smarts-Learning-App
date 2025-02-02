@@ -18,6 +18,7 @@ class _MemoryGameState extends State<MemoryGame> {
   int score = 0;
   int remainingTime = 15;
   late Timer _timer;
+  bool isScoreUpdated = false; // Flag to ensure score is updated only once per turn
 
   @override
   void initState() {
@@ -31,6 +32,8 @@ class _MemoryGameState extends State<MemoryGame> {
     cards = List.generate(9, (index) => {'isApple': index < 3, 'isFlipped': false});
     cards.shuffle();
     isRevealing = true;
+    selectedCards.clear();
+    isScoreUpdated = false; // Reset score update flag
   }
 
   void _startRevealTimer() async {
@@ -46,7 +49,7 @@ class _MemoryGameState extends State<MemoryGame> {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (remainingTime == 0) {
         _timer.cancel();
-        _savePerformance();
+        _savePerformance(totalAttempts: 0);
         if (mounted) {
           Navigator.of(context).pop();
         }
@@ -74,33 +77,53 @@ class _MemoryGameState extends State<MemoryGame> {
   }
 
   void _checkResult() {
-    final isWin = selectedCards.every((index) => cards[index]['isApple']);
-    if (isWin) score++;
+    if (selectedCards.length == 3) {
+      final isWin = selectedCards.every((index) => cards[index]['isApple']);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(isWin ? 'You guessed correctly! 🎉' : 'Try again! ❌')),
-    );
-
-    Future.delayed(Duration(seconds: 2), () {
-      _savePerformance();
-      if (mounted) {
-        Navigator.of(context).pop();
+      if (isWin && !isScoreUpdated) {
+        setState(() {
+          score++; // Increment score only once if all cards are correct
+          isScoreUpdated = true; // Mark that the score has been updated
+        });
       }
-    });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isWin ? 'You guessed correctly! 🎉' : 'Try again! ❌'),
+        ),
+      );
+
+      // Save performance only once per round
+      _savePerformance(totalAttempts: 1);
+
+      Future.delayed(Duration(seconds: 2), () {
+        if (mounted) {
+          Navigator.of(context).pop(); // Return to the home screen after 2 seconds
+        }
+      });
+    }
   }
 
-  Future<void> _savePerformance() async {
+  Future<void> _savePerformance({int totalAttempts = 0}) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     try {
-      DocumentReference performanceRef = FirebaseFirestore.instance.collection('memory_game').doc(user.uid);
+      DocumentReference performanceRef = FirebaseFirestore.instance
+          .collection('memory-game-perf')
+          .doc(user.uid);
       DocumentSnapshot docSnapshot = await performanceRef.get();
 
       if (docSnapshot.exists) {
-        await performanceRef.update({'score': FieldValue.increment(score)});
+        await performanceRef.update({
+          'score': FieldValue.increment(score), // Increment score once after each round
+          'totalAttempts': FieldValue.increment(totalAttempts),
+        });
       } else {
-        await performanceRef.set({'score': score});
+        await performanceRef.set({
+          'score': score, // Initial score on the first update
+          'totalAttempts': totalAttempts,
+        });
       }
     } catch (e) {
       print("Error saving performance: $e");
@@ -108,22 +131,38 @@ class _MemoryGameState extends State<MemoryGame> {
   }
 
   @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double screenWidth = constraints.maxWidth;
-        double screenHeight = constraints.maxHeight;
-        bool isLargeScreen = screenWidth > 900;
-        bool isTablet = screenWidth > 600 && screenWidth <= 900;
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: Text("Memory Game"),
+        backgroundColor: Colors.blue,
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          double screenWidth = constraints.maxWidth;
+          double screenHeight = constraints.maxHeight;
+          bool isLargeScreen = screenWidth > 900;
+          bool isTablet = screenWidth > 600 && screenWidth <= 900;
 
-        double headingFontSize = isLargeScreen ? 32 : (isTablet ? 28 : 24);
-        double subheadingFontSize = isLargeScreen ? 22 : (isTablet ? 18 : 16);
-        double timerFontSize = isLargeScreen ? 28 : (isTablet ? 24 : 20);
-        double emojiSize = isLargeScreen ? 60 : (isTablet ? 50 : 40);
-        double gridPadding = isLargeScreen ? 40.0 : (isTablet ? 30.0 : 20.0);
+          double headingFontSize = isLargeScreen ? 32 : (isTablet ? 28 : 24);
+          double subheadingFontSize = isLargeScreen ? 22 : (isTablet ? 18 : 16);
+          double timerFontSize = isLargeScreen ? 28 : (isTablet ? 24 : 20);
+          double emojiSize = isLargeScreen ? 60 : (isTablet ? 50 : 40);
+          double gridPadding = isLargeScreen ? 40.0 : (isTablet ? 30.0 : 20.0);
 
-        return Scaffold(
-          body: Container(
+          return Container(
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/02.png'),
@@ -133,25 +172,27 @@ class _MemoryGameState extends State<MemoryGame> {
             child: SafeArea(
               child: Padding(
                 padding: EdgeInsets.all(gridPadding),
-                child: isLargeScreen ? _buildLargeScreenLayout(
-                  headingFontSize,
-                  subheadingFontSize,
-                  timerFontSize,
-                  emojiSize,
-                  screenHeight,
-                  screenWidth,
-                ) : _buildSmallScreenLayout(
-                  headingFontSize,
-                  subheadingFontSize,
-                  timerFontSize,
-                  emojiSize,
-                  screenHeight,
-                ),
+                child: isLargeScreen
+                    ? _buildLargeScreenLayout(
+                        headingFontSize,
+                        subheadingFontSize,
+                        timerFontSize,
+                        emojiSize,
+                        screenHeight,
+                        screenWidth,
+                      )
+                    : _buildSmallScreenLayout(
+                        headingFontSize,
+                        subheadingFontSize,
+                        timerFontSize,
+                        emojiSize,
+                        screenHeight,
+                      ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -247,9 +288,7 @@ class _MemoryGameState extends State<MemoryGame> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.red,
-            boxShadow: [
-              BoxShadow(color: Colors.black26, blurRadius: 5)
-            ],
+            boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
           ),
           child: Text(
             remainingTime.toString(),
@@ -301,11 +340,5 @@ class _MemoryGameState extends State<MemoryGame> {
         },
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
   }
 }
