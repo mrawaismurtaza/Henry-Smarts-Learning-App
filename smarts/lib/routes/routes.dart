@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:smarts/features/ai-chat/main.dart';
 import 'package:smarts/features/auth/login.dart';
 import 'package:smarts/features/auth/signup';
 import 'package:smarts/features/flashcard/main.dart';
 import 'package:smarts/features/home/main.dart';
 import 'package:smarts/features/memorygame/main.dart';
+import 'package:smarts/features/quizChallenge/main.dart';
 
 // Import your game pages here
 final Map<String, WidgetBuilder> appRoutes = {
@@ -12,7 +14,7 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/login': (context) => LoginPage(),
   '/flashcards': (context) => FlashCard(),
   '/memory-game': (context) => MemoryGame(),
-  // '/quiz-challenge': (context) => QuizChallengePage(),
+  '/quiz-challenge': (context) => QuizChallenge(),
   // '/daily-challenges': (context) => DailyChallengesPage(),
-  // '/ai-chat-room': (context) => AIChatRoomPage(),
+  '/ai-chat-room': (context) => AIChatRoom(),
 };
