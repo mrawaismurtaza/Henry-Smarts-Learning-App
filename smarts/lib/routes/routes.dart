@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smarts/features/ai-chat/main.dart';
 import 'package:smarts/features/auth/login.dart';
 import 'package:smarts/features/auth/signup';
+import 'package:smarts/features/dailyChallenge/main.dart';
 import 'package:smarts/features/flashcard/main.dart';
 import 'package:smarts/features/home/main.dart';
 import 'package:smarts/features/memorygame/main.dart';
@@ -17,7 +18,7 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/flashcards': (context) => FlashCard(),
   '/memory-game': (context) => MemoryGame(),
   '/quiz-challenge': (context) => QuizChallenge(),
-  // '/daily-challenges': (context) => UserProfile(),
+  '/daily-challenges': (context) => DailChallenge(),
   '/ai-chat-room': (context) => AIChatRoom(),
   '/profile': (context) => UserProfile(), 
 };

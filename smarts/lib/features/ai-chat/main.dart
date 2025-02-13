@@ -16,7 +16,7 @@ class _AIChatRoomState extends State<AIChatRoom> {
   @override
   void initState() {
     super.initState();
-    dotenv.load(); // Load environment variables
+    // dotenv.load(); // Load environment variables
     setState(() {});
   }
 
