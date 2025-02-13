@@ -5,7 +5,9 @@ import 'package:smarts/features/auth/signup';
 import 'package:smarts/features/flashcard/main.dart';
 import 'package:smarts/features/home/main.dart';
 import 'package:smarts/features/memorygame/main.dart';
+import 'package:smarts/features/profile/main.dart';
 import 'package:smarts/features/quizChallenge/main.dart';
+import 'package:smarts/features/profile/main.dart';
 
 // Import your game pages here
 final Map<String, WidgetBuilder> appRoutes = {
@@ -15,6 +17,7 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/flashcards': (context) => FlashCard(),
   '/memory-game': (context) => MemoryGame(),
   '/quiz-challenge': (context) => QuizChallenge(),
-  // '/daily-challenges': (context) => DailyChallengesPage(),
+  // '/daily-challenges': (context) => UserProfile(),
   '/ai-chat-room': (context) => AIChatRoom(),
+  '/profile': (context) => UserProfile(), 
 };

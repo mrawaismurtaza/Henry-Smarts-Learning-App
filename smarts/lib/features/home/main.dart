@@ -21,7 +21,33 @@ class _HomePageState extends State<HomePage> {
           Image.asset('assets/images/02.png', fit: BoxFit.cover),
           Positioned(
             top: 50, left: 0, right: 0,
-            child: Center(child: Image.asset('assets/images/Logo.png', height: 100)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(width: 50), // For balance
+                Image.asset('assets/images/Logo.png', height: 100),
+                Padding(
+                  padding: const EdgeInsets.only(right: 20.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/profile');
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.8),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.person,
+                        color: Colors.green,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           Center(
             child: SingleChildScrollView(
@@ -89,7 +115,7 @@ class _HomePageState extends State<HomePage> {
               color: Colors.grey.withOpacity(0.3),
               spreadRadius: 2,
               blurRadius: 5,
-              offset: Offset(0, 2), // changes position of shadow
+              offset: Offset(0, 2),
             ),
           ],
         ),

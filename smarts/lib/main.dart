@@ -6,7 +6,8 @@ import 'package:smarts/routes/routes.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); 
 
-  await dotenv.load();  // Load environment variables
+  await dotenv.load(fileName: "assets/.env");
+  // Load environment variables
 
   await Firebase.initializeApp(
     options: const FirebaseOptions(
