@@ -1,11 +1,13 @@
-platform :ios, '11.0'
+platform :ios, '12.0' # (or keep '11.0' if needed)
 
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 disable_input_output_paths! if respond_to?(:disable_input_output_paths!)
 
-flutter_root = 'D:/flutter'
-load File.join(flutter_root, 'packages/flutter_tools/bin', 'podhelper.rb')
+# Dynamically set Flutter SDK path (Works Locally & on Codemagic)
+flutter_root = ENV['FLUTTER_ROOT'] || File.expand_path('..', File.dirname(__FILE__)) + '/flutter'
+
+load File.join(flutter_root, 'packages/flutter_tools/bin/podhelper.rb')
 
 target 'Runner' do
   use_frameworks!
