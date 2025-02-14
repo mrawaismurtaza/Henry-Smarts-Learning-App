@@ -47,5 +47,8 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>MinimumOSVersion</key>
+		<string>13.0</string>
+
 	</dict>
 </plist>
