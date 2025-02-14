@@ -4,18 +4,24 @@ ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 disable_input_output_paths! if respond_to?(:disable_input_output_paths!)
 
-# Dynamically set Flutter SDK path (Works Locally & on Codemagic)
+# Correctly Set Flutter SDK Path for Windows and Codemagic
 flutter_root = ENV['FLUTTER_ROOT'] || File.expand_path('..', File.dirname(__FILE__)) + '/flutter'
-
 load File.join(flutter_root, 'packages/flutter_tools/bin/podhelper.rb')
 
 target 'Runner' do
-  use_frameworks!
+  use_frameworks! :linkage => :static
   use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
   target 'RunnerTests' do
     inherit! :search_paths
+  end
+end
+
+# Ensure post_install script for Codemagic
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
   end
 end
